@@ -5,6 +5,7 @@ ChooseAction::ChooseAction(GraphicProject::Actions action, size_t num_of_roots, 
     QDialog(parent),
     ui(new Ui::ChooseAction), action_(action) {
     ui->setupUi(this);
+    setWindowTitle(QString::fromStdString(GraphicProject::action_names[action] + " parametrs"));
     switch (action) {
     case GraphicProject::Actions::Merge:
         ui->KeyLabel->hide();

@@ -20,7 +20,7 @@ static constexpr int dist_between_nodes_x = 50;
 static constexpr int dist_between_nodes_y = 75;
 static constexpr int dist_between_trees = 200;
 
-static const std::array<QColor, 5> color_palette = { Qt::blue, Qt::green, Qt::red, Qt::magenta, Qt::gray };
+static const std::array<QColor, 5> color_palette = { Qt::blue, Qt::darkGreen, Qt::red, Qt::magenta, Qt::gray };
 
 struct NodeGraphicData {
     int key;
@@ -64,7 +64,7 @@ private:
     std::vector<std::vector<QGraphicsEllipseItem *>> nodes_;
     std::vector<std::vector<NodeGraphicData>> nodes_data_;
     //std::vector<std::vector<std::unique_ptr<QGraphicsTextItem>>> nodes_text_;
-    std::vector<std::vector<QGraphicsTextItem *>> nodes_text_;
+    std::vector<std::vector<std::pair<QGraphicsTextItem *, QGraphicsTextItem *>>> nodes_text_;
     std::vector<std::vector<QGraphicsLineItem *>> edges_;
     std::vector<std::pair<int, int>> border_x_coord_;
 };

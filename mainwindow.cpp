@@ -6,6 +6,7 @@ MainWindow::MainWindow(QWidget *parent)
     , ui(new Ui::MainWindow) {
     ui->setupUi(this);
     ui->GraphView->viewport()->setAttribute(Qt::WA_AcceptTouchEvents, false);
+    setWindowTitle("Cartesian Tree Drawer");
 
     tree_ = new GraphicProject::CartesianTree();
     drawer_ = new GraphicProject::GraphicComponent(*tree_, new QGraphicsScene());

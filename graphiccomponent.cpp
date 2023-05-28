@@ -82,11 +82,16 @@ void GraphicComponent::DrawGraph() {
                                    radius, radius, QPen(Qt::white),
                                    color_palette[i % color_palette.size()])
                 );
-            nodes_text_[i].push_back(
-                scene_->addText(QString::number(nodes_data_[i][j].key))
-                );
-            nodes_text_[i].back()->setPos(nodes_data_[i][j].coord_x + radius / 4,
-                                          nodes_data_[i][j].coord_y + radius / 4);
+            qreal offset_key = (5 - QString::number(nodes_data_[i][j].key).size()) * radius / 10;
+            qreal offset_priority = (5 - QString::number(nodes_data_[i][j].priority).size()) * radius / 10;
+            nodes_text_[i].push_back({
+                scene_->addText(QString::number(nodes_data_[i][j].key)),
+                scene_->addText(QString::number(nodes_data_[i][j].priority))
+            });
+            nodes_text_[i].back().first->setPos(nodes_data_[i][j].coord_x + offset_key,
+                                          nodes_data_[i][j].coord_y + radius / 8);
+            nodes_text_[i].back().second->setPos(nodes_data_[i][j].coord_x + offset_priority,
+                                                nodes_data_[i][j].coord_y + 7 * radius / 16);
         }
     }
 }
@@ -95,9 +100,11 @@ void GraphicComponent::Clear() {
     for (size_t i = 0; i < nodes_.size(); ++i) {
         for (size_t j = 0; j < nodes_[i].size(); ++j) {
             scene_->removeItem(nodes_[i][j]);
-            scene_->removeItem(nodes_text_[i][j]);
+            scene_->removeItem(nodes_text_[i][j].first);
+            scene_->removeItem(nodes_text_[i][j].second);
             delete nodes_[i][j];
-            delete nodes_text_[i][j];
+            delete nodes_text_[i][j].first;
+            delete nodes_text_[i][j].second;
         }
     }
     for (size_t i = 0; i < edges_.size(); ++i) {

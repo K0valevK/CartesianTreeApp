@@ -5,6 +5,7 @@ ChooseNodeXY::ChooseNodeXY(QWidget *parent) :
     QDialog(parent),
     ui(new Ui::ChooseNodeXY) {
     ui->setupUi(this);
+    setWindowTitle("Node parametrs");
 }
 
 ChooseNodeXY::~ChooseNodeXY() {
