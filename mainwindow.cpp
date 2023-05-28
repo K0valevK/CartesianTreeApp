@@ -11,6 +11,7 @@ MainWindow::MainWindow(QWidget *parent)
     tree_ = new GraphicProject::CartesianTree();
     drawer_ = new GraphicProject::GraphicComponent(*tree_, new QGraphicsScene());
     FillActions();
+    EnableButtons();
 
     ui->GraphView->setScene(drawer_->GetScene());
     ui->GraphView->setCacheMode(QGraphicsView::CacheBackground);
@@ -21,8 +22,8 @@ MainWindow::MainWindow(QWidget *parent)
     ui->GraphView->setMinimumSize(640, 480);
 
     connect(ui->AddRandomNodeButton, &QPushButton::clicked, this, &MainWindow::CreateRandomNode);
-    connect(ui->AddNodeKeyButton, &QPushButton::clicked, this, &MainWindow::OpenChooseKeyWindow);
-    connect(ui->AddNodeButton, &QPushButton::clicked, this, &MainWindow::OpenChooseWindow);
+    connect(ui->AddNodeKeyButton, &QPushButton::clicked, this, &MainWindow::CreateChooseWindow);
+    connect(ui->AddNodeButton, &QPushButton::clicked, this, &MainWindow::CreateChooseWindow);
     connect(ui->MergeButton, &QPushButton::clicked, this, &MainWindow::CreateActionWindow);
     connect(ui->SplitButton, &QPushButton::clicked, this, &MainWindow::CreateActionWindow);
     connect(ui->InsertButton, &QPushButton::clicked, this, &MainWindow::CreateActionWindow);
@@ -42,20 +43,9 @@ void MainWindow::CreateRandomNode() {
     CreateNode();
 }
 
-void MainWindow::OpenChooseWindow() {
-    choose_node_window_ = std::make_unique<ChooseNodeXY>(new ChooseNodeXY());
+void MainWindow::CreateChooseWindow() {
+    choose_node_window_ = std::unique_ptr<ChooseNodeXY>(new ChooseNodeXY(action_buttons_[sender()]));
     choose_node_window_->setModal(true);
-
-    connect(choose_node_window_.get(), &QDialog::accepted, choose_node_window_.get(), &ChooseNodeXY::SendDataXY);
-    connect(choose_node_window_.get(), &ChooseNodeXY::SendDataNode, this, &MainWindow::RecieveDataNode);
-
-    choose_node_window_->exec();
-}
-
-void MainWindow::OpenChooseKeyWindow() {
-    choose_node_window_ = std::make_unique<ChooseNodeXY>(new ChooseNodeXY());
-    choose_node_window_->setModal(true);
-    choose_node_window_->HidePriorityEditLine();
 
     connect(choose_node_window_.get(), &QDialog::accepted, choose_node_window_.get(), &ChooseNodeXY::SendDataXY);
     connect(choose_node_window_.get(), &ChooseNodeXY::SendDataNode, this, &MainWindow::RecieveDataNode);
@@ -76,6 +66,7 @@ void MainWindow::CreateActionWindow() {
 void MainWindow::ClearAll() {
     tree_->Clear();
     drawer_->Clear();
+    EnableButtons();
 }
 
 void MainWindow::ExitApp() {
@@ -83,63 +74,106 @@ void MainWindow::ExitApp() {
 }
 
 void MainWindow::RecieveDataNode(QString key, QString priority) {
-    bool is_convertable;
-    latest_input_.first = key.toInt(&is_convertable);
-    if (!is_convertable) {
-        QMessageBox::warning(this, "Error:", "Not acceptable key value was provided!");
+    if (!IsCorrectFormat(key, true, &latest_input_.first)) {
         return;
     }
     if (priority.isEmpty()) {
         latest_input_.second = GraphicProject::Random::GetInstance().GetInt();
     } else {
-        latest_input_.second = priority.toInt(&is_convertable);
-        if (!is_convertable) {
-            QMessageBox::warning(this, "Error:", "Not acceptable priority value was provided!");
+        if (!IsCorrectFormat(priority, false, &latest_input_.second)) {
             return;
         }
     }
     CreateNode();
 }
 
-void MainWindow::RecieveAction(GraphicProject::Actions action, int main_tree, int additional_tree, QString value) {
-    bool is_convertable;
-    int key = value.toInt(&is_convertable);
-    if (!value.isEmpty() && !is_convertable) {
-        QMessageBox::warning(this, "Error:", "Not acceptable key value was provided!");
-        return;
-    }
+void MainWindow::RecieveAction(GraphicProject::Actions action, int main_tree, int additional_tree, QString key, QString priority) {
     switch (action) {
     case GraphicProject::Actions::Merge:
         if (main_tree == additional_tree) {
             QMessageBox::warning(this, "Error:", "Tree can not be merged with itself!");
             return;
         }
-        tree_->Merge(main_tree, additional_tree);
+        if (!tree_->Merge(main_tree, additional_tree)) {
+            QMessageBox::warning(this, "Error:", "Theese trees cannot be merged!");
+        }
         break;
     case GraphicProject::Actions::Split:
-        tree_->Split(main_tree, key);
+        if (!IsCorrectFormat(key, true, &latest_input_.first)) {
+            return;
+        }
+        tree_->Split(main_tree, latest_input_.first);
         break;
     case GraphicProject::Actions::Insert:
-        tree_->Insert(main_tree, key);
+        if (!IsCorrectFormat(key, true, &latest_input_.first)) {
+            return;
+        }
+        if (!IsCorrectFormat(priority, false, &latest_input_.second)) {
+            return;
+        }
+        tree_->Insert(main_tree, latest_input_.first, latest_input_.second);
         break;
     case GraphicProject::Actions::Erase:
-        tree_->Erase(main_tree, key);
+        if (!IsCorrectFormat(key, true, &latest_input_.first)) {
+            return;
+        }
+        tree_->Erase(main_tree, latest_input_.first);
         break;
     default:
         break;
     }
+    EnableButtons();
 }
 
-
+void MainWindow::EnableButtons() {
+    if (tree_->GetSize() >= 1) {
+        ui->SplitButton->setEnabled(true);
+        ui->InsertButton->setEnabled(true);
+        ui->EraseButton->setEnabled(true);
+        if (tree_->GetSize() >= 2) {
+            ui->MergeButton->setEnabled(true);
+        }
+        return;
+    }
+    ui->SplitButton->setEnabled(false);
+    ui->InsertButton->setEnabled(false);
+    ui->EraseButton->setEnabled(false);
+    if (tree_->GetSize() < 2) {
+        ui->MergeButton->setEnabled(false);
+    }
+}
 
 void MainWindow::CreateNode() {
     tree_->Add(latest_input_);
+    EnableButtons();
 }
 
 void MainWindow::FillActions() {
+    action_buttons_[ui->AddNodeKeyButton] = GraphicProject::Actions::CreateNodeKey;
+    action_buttons_[ui->AddNodeButton] = GraphicProject::Actions::CreateNodeCustom;
     action_buttons_[ui->MergeButton] = GraphicProject::Actions::Merge;
     action_buttons_[ui->SplitButton] = GraphicProject::Actions::Split;
     action_buttons_[ui->InsertButton] = GraphicProject::Actions::Insert;
     action_buttons_[ui->EraseButton] = GraphicProject::Actions::Erase;
 }
 
+bool MainWindow::IsCorrectFormat(const QString &value, bool iskey, int *result) {
+    bool is_convertable;
+    int tmp = value.toInt(&is_convertable);
+    if (!is_convertable) {
+        if (iskey) {
+            QMessageBox::warning(this, "Error:", "Not acceptable key value was provided!");
+        } else {
+            QMessageBox::warning(this, "Error:", "Not acceptable priority value was provided!");
+        }
+        return false;
+    }
+    if (!((value[0] == '-' && value.size() <= 5) || value.size() <= 4)) {
+        QMessageBox::warning(this, "Error:", "Please provide number under 5 digits!");
+        return false;
+    }
+    if (result) {
+        *result = tmp;
+    }
+    return true;
+}

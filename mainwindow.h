@@ -28,18 +28,19 @@ public:
 
 private slots:
     void CreateRandomNode();
-    void OpenChooseWindow();
-    void OpenChooseKeyWindow();
+    void CreateChooseWindow();
     void CreateActionWindow();
     void ClearAll();
     void ExitApp();
 
     void RecieveDataNode(QString key, QString priority);
-    void RecieveAction(GraphicProject::Actions action, int main_tree, int additional_tree, QString value);
+    void RecieveAction(GraphicProject::Actions action, int main_tree, int additional_tree, QString key, QString priority);
 
 private:
+    void EnableButtons();
     void CreateNode();
     void FillActions();
+    bool IsCorrectFormat(const QString &value, bool iskey, int *result);
 
 private:
     Ui::MainWindow *ui;

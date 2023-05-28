@@ -20,6 +20,10 @@ static constexpr int dist_between_nodes_x = 50;
 static constexpr int dist_between_nodes_y = 75;
 static constexpr int dist_between_trees = 200;
 
+static constexpr std::pair<int, int> start_scene_size = {512, 512};
+static constexpr int start_pos_x = start_scene_size.first / 2;
+static constexpr int start_pos_y = start_scene_size.second / 2;
+
 static const std::array<QColor, 5> color_palette = { Qt::blue, Qt::darkGreen, Qt::red, Qt::magenta, Qt::gray };
 
 struct NodeGraphicData {
@@ -55,10 +59,12 @@ private:
     void CalculateCoords(size_t index, const std::unique_ptr<CartesianTree::Node> &node, int x, int y, size_t parent = 0);
     void CalcualteOffset();
     void DrawGraph();
+    void ResizeScene();
 
 private:
     CartesianTree &tree_;
     QGraphicsScene *scene_;
+    std::pair<int, int> scene_size = start_scene_size;
     //vector2D<UniqueEllipse> nodes_;
     //std::vector<std::vector<std::unique_ptr<QGraphicsEllipseItem>>> nodes_;
     std::vector<std::vector<QGraphicsEllipseItem *>> nodes_;
@@ -67,6 +73,7 @@ private:
     std::vector<std::vector<std::pair<QGraphicsTextItem *, QGraphicsTextItem *>>> nodes_text_;
     std::vector<std::vector<QGraphicsLineItem *>> edges_;
     std::vector<std::pair<int, int>> border_x_coord_;
+    int border_y_;
 };
 
 } // namespace GraphicProject

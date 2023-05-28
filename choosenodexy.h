@@ -3,6 +3,8 @@
 
 #include <QDialog>
 
+#include "actionbuttons.h"
+
 namespace Ui {
 class ChooseNodeXY;
 } // namespace UI
@@ -11,16 +13,18 @@ class ChooseNodeXY : public QDialog {
     Q_OBJECT
 
 public:
-    explicit ChooseNodeXY(QWidget *parent = nullptr);
+    ChooseNodeXY(GraphicProject::Actions action, QWidget *parent = nullptr);
     ~ChooseNodeXY();
-
-    void HidePriorityEditLine();
 
 signals:
     void SendDataNode(QString key, QString priority);
 
 public slots:
     void SendDataXY();
+
+private:
+    void HidePriorityEditLine();
+    void UpdateSize();
 
 private:
     Ui::ChooseNodeXY *ui;

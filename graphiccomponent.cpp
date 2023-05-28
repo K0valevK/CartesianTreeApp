@@ -1,13 +1,11 @@
 #include "graphiccomponent.h"
 
-#include <QtDebug>
-
 namespace GraphicProject {
 
 GraphicComponent::GraphicComponent(CartesianTree &tree, QGraphicsScene *scene) : tree_(tree), scene_(scene) {
     tree_.Subscribe(this);
     scene->setItemIndexMethod(QGraphicsScene::NoIndex);
-    scene->setSceneRect(0, 0, 2048, 2048);
+    scene->setSceneRect(0, 0, scene_size.first, scene_size.second);
     nodes_.reserve(10);
     nodes_data_.reserve(10);
 }
@@ -19,12 +17,13 @@ GraphicComponent::~GraphicComponent() {
 void GraphicComponent::Notify() {
     Clear();
     border_x_coord_.resize(tree_.GetSize(), {INT_MAX, INT_MIN});
+    border_y_ = 0;
     for (size_t i = 0; i < tree_.GetSize(); ++i) {
         nodes_.push_back({});
         nodes_data_.push_back({});
         nodes_text_.push_back({});
         edges_.push_back({});
-        CalculateCoords(i, tree_[i], 1024, 1024);
+        CalculateCoords(i, tree_[i], start_pos_x, start_pos_y);
     }
     DrawGraph();
 }
@@ -41,6 +40,7 @@ void GraphicComponent::CalculateCoords(size_t index, const std::unique_ptr<Carte
     int new_parent = nodes_data_[index].size() - 1;
     border_x_coord_[index].first = std::min(x, border_x_coord_[index].first);
     border_x_coord_[index].second = std::max(x, border_x_coord_[index].second);
+    border_y_ = std::max(y, border_y_);
     CalculateCoords(index, node->GetLeft(), x - dist_between_nodes_x, y + dist_between_nodes_y, new_parent);
     CalculateCoords(index, node->GetRight(), x + dist_between_nodes_x, y + dist_between_nodes_y, new_parent);
 }
@@ -62,6 +62,7 @@ void GraphicComponent::CalcualteOffset() {
 
 void GraphicComponent::DrawGraph() {
     CalcualteOffset();
+    ResizeScene();
     for (size_t i = 0; i < nodes_data_.size(); ++i) {
         for (size_t j = 0; j < nodes_data_[i].size(); ++j) {
             if (nodes_data_[i][j].parent != j) {
@@ -94,6 +95,16 @@ void GraphicComponent::DrawGraph() {
                                                 nodes_data_[i][j].coord_y + 7 * radius / 16);
         }
     }
+}
+
+void GraphicComponent::ResizeScene() {
+    while (border_x_coord_.back().second + dist_between_trees > scene_size.first) {
+        scene_size.first *= 2;
+    }
+    while (border_y_ + 2 * dist_between_nodes_y > scene_size.second) {
+        scene_size.second *= 2;
+    }
+    scene_->setSceneRect(0, 0, scene_size.first, scene_size.second);
 }
 
 void GraphicComponent::Clear() {

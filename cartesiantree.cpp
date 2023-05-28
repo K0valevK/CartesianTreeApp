@@ -109,7 +109,6 @@ void GraphicProject::CartesianTree::Node::Update_min_max(
 
 GraphicProject::CartesianTree::CartesianTree() {
     roots_.reserve(10);
-    roots_.push_back(nullptr);
 }
 
 GraphicProject::CartesianTree::CartesianTree(int key) {
@@ -137,7 +136,6 @@ void GraphicProject::CartesianTree::Add(int key) {
     } else {
         roots_.push_back(std::make_unique<Node>(key));
     }
-    Sort();
     Notify();
 }
 
@@ -147,7 +145,6 @@ void GraphicProject::CartesianTree::Add(std::pair<int, int> data) {
     } else {
         roots_.push_back(std::make_unique<Node>(data));
     }
-    Sort();
     Notify();
 }
 
@@ -157,24 +154,18 @@ void GraphicProject::CartesianTree::Add(int key, int priority) {
     } else {
         roots_.push_back(std::make_unique<Node>(key, priority));
     }
-    Sort();
     Notify();
 }
 
-void GraphicProject::CartesianTree::Merge(size_t lhs, size_t rhs) {
+bool GraphicProject::CartesianTree::Merge(size_t lhs, size_t rhs) {
     if (IsMergeable(lhs, rhs)) {
         roots_[lhs] = std::move(Node::Merge(roots_[lhs], roots_[rhs]));
         roots_[rhs].swap(roots_.back());
         roots_.pop_back();
-        Sort();
         Notify();
-    } else if (IsMergeable(rhs, lhs)) {
-        roots_[rhs] = std::move(Node::Merge(roots_[rhs], roots_[lhs]));
-        roots_[lhs].swap(roots_.back());
-        roots_.pop_back();
-        Sort();
-        Notify();
+        return true;
     }
+    return false;
 }
 
 void GraphicProject::CartesianTree::Split(size_t index, int key) {
@@ -187,7 +178,6 @@ void GraphicProject::CartesianTree::Split(size_t index, int key) {
     } else {
         roots_[index] = std::move(tmp.second);
     }
-    Sort();
     Notify();
 }
 
@@ -197,7 +187,6 @@ void GraphicProject::CartesianTree::Insert(size_t index, int key) {
     tmp.first = std::move(Node::Merge(tmp.first, new_node));
     roots_[index] = std::move(Node::Merge(tmp.first, tmp.second));
 
-    Sort();
     Notify();
 }
 
@@ -208,7 +197,6 @@ void GraphicProject::CartesianTree::Insert(size_t index, int key,
     tmp.first = std::move(Node::Merge(tmp.first, new_node));
     roots_[index] = std::move(Node::Merge(tmp.first, tmp.second));
 
-    Sort();
     Notify();
 }
 
@@ -221,7 +209,6 @@ void GraphicProject::CartesianTree::Erase(size_t index, int key) {
         roots_[index].swap(roots_.back());
         roots_.pop_back();
     }
-    Sort();
     Notify();
 }
 

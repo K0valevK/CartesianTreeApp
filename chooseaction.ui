@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>400</width>
-    <height>133</height>
+    <height>166</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -41,6 +41,20 @@
        </item>
        <item>
         <widget class="QLineEdit" name="KeyEdit"/>
+       </item>
+      </layout>
+     </item>
+     <item>
+      <layout class="QHBoxLayout" name="horizontalLayout_6">
+       <item>
+        <widget class="QLabel" name="PriorityLabel">
+         <property name="text">
+          <string>Priority</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QLineEdit" name="PriorityEdit"/>
        </item>
       </layout>
      </item>

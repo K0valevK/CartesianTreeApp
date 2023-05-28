@@ -18,10 +18,16 @@ public:
     ~ChooseAction();
 
 signals:
-    void SendActionSignal(GraphicProject::Actions action, int main_tree, int additional_tree, QString value);
+    void SendActionSignal(GraphicProject::Actions action, int main_tree, int additional_tree, QString key, QString priority);
 
 public slots:
     void SendAction();
+
+private:
+    void HideKey();
+    void HidePriority();
+    void HideAdditionalBox();
+    void UpdateSize();
 
 private:
     Ui::ChooseAction *ui;

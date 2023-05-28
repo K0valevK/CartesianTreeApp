@@ -1,7 +1,6 @@
 #ifndef CARTESIANTREE_H
 #define CARTESIANTREE_H
 
-
 #include <algorithm>
 #include <cmath>
 #include <memory>
@@ -73,7 +72,7 @@ public:
     void Add(std::pair<int, int> data);
     void Add(int key, int priority);
 
-    void Merge(size_t lhs, size_t rhs);
+    bool Merge(size_t lhs, size_t rhs);
 
     void Split(size_t index, int key);
 

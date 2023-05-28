@@ -7,10 +7,10 @@
 namespace GraphicProject {
 
 enum Actions {
-    Merge, Split, Insert, Erase
+    CreateNodeRandom, CreateNodeKey, CreateNodeCustom, Merge, Split, Insert, Erase
 };
 
-static const std::array<std::string, 4> action_names = {"Merge", "Split", "Insert", "Erase"};
+static const std::array<std::string, 7> action_names = {"", "", "", "Merge", "Split", "Insert", "Erase"};
 
 } // namespace GraphicProject
 
